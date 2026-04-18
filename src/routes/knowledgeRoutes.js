@@ -1,0 +1,49 @@
+import { Router } from 'express';
+import knowledgeController from '../controllers/knowledgeController.js';
+import { protect, tenantIsolation, requirePermission } from '../middlewares/authMiddleware.js';
+import validate from '../middlewares/validateMiddleware.js';
+import {
+  createKnowledge,
+  updateKnowledge,
+  listKnowledge,
+} from '../validators/knowledgeValidator.js';
+import { RESOURCES, ACTIONS } from '../constants/index.js';
+
+const router = Router();
+
+router.use(protect, tenantIsolation);
+
+router.post(
+  '/',
+  requirePermission(RESOURCES.KNOWLEDGE, ACTIONS.CREATE),
+  validate(createKnowledge),
+  knowledgeController.createKnowledgeItem
+);
+
+router.get(
+  '/',
+  requirePermission(RESOURCES.KNOWLEDGE, ACTIONS.READ),
+  validate(listKnowledge),
+  knowledgeController.listKnowledgeItems
+);
+
+router.get(
+  '/:id',
+  requirePermission(RESOURCES.KNOWLEDGE, ACTIONS.READ),
+  knowledgeController.getKnowledgeItem
+);
+
+router.patch(
+  '/:id',
+  requirePermission(RESOURCES.KNOWLEDGE, ACTIONS.UPDATE),
+  validate(updateKnowledge),
+  knowledgeController.updateKnowledgeItem
+);
+
+router.delete(
+  '/:id',
+  requirePermission(RESOURCES.KNOWLEDGE, ACTIONS.DELETE),
+  knowledgeController.deleteKnowledgeItem
+);
+
+export default router;

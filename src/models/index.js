@@ -1,0 +1,21 @@
+import Company from './company.js';
+import User from './user.js';
+import KnowledgeItem from './knowledgeItem.js';
+import ChatSession from './chatSession.js';
+import Ticket from './ticket.js';
+import EventLog from './eventLog.js';
+import TicketFeedback from './ticketFeedback.js';
+import QAAnalysis from './qaAnalysis.js';
+import Call from './call.js';
+
+export {
+  Company,
+  User,
+  KnowledgeItem,
+  ChatSession,
+  Ticket,
+  EventLog,
+  TicketFeedback,
+  QAAnalysis,
+  Call,
+};
