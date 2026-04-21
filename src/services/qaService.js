@@ -331,6 +331,7 @@ class QAService {
     const {
       page = 1,
       limit = 20,
+      ticketId,
       agentId,
       sentiment,
       status,
@@ -338,6 +339,7 @@ class QAService {
     } = filters;
 
     const query = { companyId };
+    if (ticketId) query.ticketId = ticketId;
     if (agentId) query.agentId = agentId;
     if (sentiment) query.customerSentiment = sentiment;
     if (status) query.resolutionStatus = status;

@@ -7,6 +7,7 @@ import EventLog from './eventLog.js';
 import TicketFeedback from './ticketFeedback.js';
 import QAAnalysis from './qaAnalysis.js';
 import Call from './call.js';
+import AuditLog from './auditLog.js';
 
 export {
   Company,
@@ -18,4 +19,5 @@ export {
   TicketFeedback,
   QAAnalysis,
   Call,
+  AuditLog,
 };

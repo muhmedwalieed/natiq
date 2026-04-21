@@ -11,6 +11,7 @@ const createUser = {
       .valid(ROLES.COMPANY_MANAGER, ROLES.TEAM_LEADER, ROLES.AGENT)
       .required(),
     profileImage: Joi.string().uri().allow(null, ''),
+    teamLeaderId: Joi.string().optional().allow(null),
   }),
 };
 
@@ -24,13 +25,14 @@ const updateUser = {
     role: Joi.string().valid(ROLES.COMPANY_MANAGER, ROLES.TEAM_LEADER, ROLES.AGENT),
     isActive: Joi.boolean(),
     profileImage: Joi.string().uri().allow(null, ''),
+    teamLeaderId: Joi.string().optional().allow(null),
   }),
 };
 
 const listUsers = {
   query: Joi.object({
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(20),
+    limit: Joi.number().integer().min(1).max(200).default(20),
     role: Joi.string().valid(...Object.values(ROLES)),
     isActive: Joi.boolean(),
     search: Joi.string().trim(),

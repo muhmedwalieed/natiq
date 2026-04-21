@@ -38,7 +38,7 @@ class AgentTicketService {
     if (ticket.channel === CHANNELS.TELEGRAM && ticket.userId) {
       try {
         const company = await Company.findById(companyId);
-        const botToken = company.channelsConfig?.telegram?.botToken || config.telegram.botToken;
+        const botToken = company.channelsConfig?.telegram?.botToken;
         const user = await User.findById(ticket.userId._id);
 
                 if (user && user.telegramChatId && botToken) {
@@ -118,7 +118,7 @@ class AgentTicketService {
 
         if (session.channel === CHANNELS.TELEGRAM) {
           const company = await Company.findById(companyId);
-          const botToken = company.channelsConfig?.telegram?.botToken || config.telegram.botToken;
+          const botToken = company.channelsConfig?.telegram?.botToken;
           const user = await User.findById(session.userId);
 
           if (user?.telegramChatId && botToken) {
@@ -264,6 +264,8 @@ class AgentTicketService {
 
     ticket.status = TICKET_STATUS.RESOLVED;
     if (!ticket.resolvedAt) ticket.resolvedAt = new Date();
+    if (!ticket.context) ticket.context = {};
+    ticket.context.analysisStatus = 'pending';
     await ticket.save();
 
     await logEvent({
@@ -272,6 +274,10 @@ class AgentTicketService {
       entityType: 'ticket',
       entityId: ticket._id,
       metadata: { agentId, ticketNumber: ticket.ticketNumber },
+    });
+
+    qaService.analyzeAndSaveByTicketId(companyId, ticketId).catch((err) => {
+      console.error(`[QA Automation] Resolve trigger failed for ticket ${ticket.ticketNumber}:`, err.message);
     });
 
     await this.sendFeedbackPromptToCustomer(ticket, companyId);
@@ -335,7 +341,7 @@ class AgentTicketService {
       const customer = await User.findById(session.userId);
       if (!customer?.telegramChatId) return;
 
-      const botToken = company.channelsConfig?.telegram?.botToken || config.telegram.botToken;
+      const botToken = company.channelsConfig?.telegram?.botToken;
       const axios = (await import('axios')).default;
       try {
         await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {

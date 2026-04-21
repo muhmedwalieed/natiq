@@ -22,7 +22,14 @@ class AgentController extends BaseController {
     const user = await User.findOne({ companyId: company._id, email });
     if (!user) throw ApiError.unauthorized('Invalid email or password');
     if (!user.isActive) throw ApiError.unauthorized('Account is deactivated');
-    if (user.role !== ROLES.AGENT) throw ApiError.forbidden('This login is for agents only');
+    if (
+      user.role !== ROLES.AGENT &&
+      user.role !== ROLES.TEAM_LEADER &&
+      user.role !== ROLES.COMPANY_MANAGER &&
+      user.role !== ROLES.COMPANY_OWNER
+    ) {
+      throw ApiError.forbidden('This login is for agents, team leaders, managers, and company owners');
+    }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) throw ApiError.unauthorized('Invalid email or password');
@@ -80,15 +87,17 @@ class AgentController extends BaseController {
         const company = await Company.findById(req.companyId);
 
         if (session.channel === CHANNELS.TELEGRAM && customer?.telegramChatId) {
-          const botToken = company?.channelsConfig?.telegram?.botToken || config.telegram.botToken;
-          try {
-            await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-              chat_id: customer.telegramChatId,
-              text: `An agent (*${req.user.name}*) has picked up your ticket *#${ticket.ticketNumber}* and will assist you shortly. Please stay connected!`,
-              parse_mode: 'Markdown',
-            });
-          } catch (err) {
-            console.error('Telegram claim notify error:', err.response?.data || err.message);
+          const botToken = company?.channelsConfig?.telegram?.botToken;
+          if (botToken) {
+            try {
+              await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                chat_id: customer.telegramChatId,
+                text: `An agent (*${req.user.name}*) has picked up your ticket *#${ticket.ticketNumber}* and will assist you shortly. Please stay connected!`,
+                parse_mode: 'Markdown',
+              });
+            } catch (err) {
+              console.error('Telegram claim notify error:', err.response?.data || err.message);
+            }
           }
         }
 
